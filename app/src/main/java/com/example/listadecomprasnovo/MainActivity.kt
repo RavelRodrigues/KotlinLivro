@@ -12,6 +12,8 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 import java.text.NumberFormat
 import java.util.Locale
 
@@ -66,47 +68,58 @@ class MainActivity : AppCompatActivity() {
         listView.adapter = productsAdapter */
 
 
-
+        // Corroutine para acessar o banco
 
     }
     override fun onResume() {
         super.onResume()
 
-        //Limpando antes de adicionar novos produtos para nao duplicar
-        productsAdapter.clear()
 
-        //Recebendo a lista(produtosGlobal) como parametro e adicionando todos os elementos
-        productsAdapter.addAll(Utils.produtosGlobal)
-        productsAdapter.notifyDataSetChanged()
+        lifecycleScope.launch {
+            // 1. Acessar o banco
+            val db = AppDatabase.getInstance(applicationContext)
+            val produtoDao = db.produtoDao()
 
-        //Realiza o somatorio
-        val soma = Utils.produtosGlobal.sumOf{ it.valor * it.quantidade }
+            // 2. Buscar do banco
+            val produtosEntity = produtoDao.obterTodosProdutos()
 
-        //Formatando para exibir e importando o txt_total_value
-        val txt_total_value = findViewById<TextView>(R.id.txt_total_value)
-        val f = NumberFormat.getCurrencyInstance(Locale("pt", "br"))
-        txt_total_value.text = "Total: ${ f.format(soma)}"
+            // 3. Converter para Produto
+            val produtos = produtosEntity.map { ProdutoMapper.fromEntity(it) }
 
+            // 4. Atualizar o adapter
+            productsAdapter.clear()
+            productsAdapter.addAll(produtos)
+            productsAdapter.notifyDataSetChanged()
 
+            // 5. Atualizar o total
+            val soma = produtos.sumOf { it.valor * it.quantidade }
+            val txt_total_value = findViewById<TextView>(R.id.txt_total_value)
+            val f = NumberFormat.getCurrencyInstance(Locale("pt", "br"))
+            txt_total_value.text = "Total: ${f.format(soma)}"
 
+            // 6. Excluir (caso deseje manter isso no banco depois, veja observação abaixo)
+            listView.setOnItemLongClickListener { _, _, position, _ ->
+                val item = productsAdapter.getItem(position)
 
-        //Excluindo itens
-        listView.setOnItemLongClickListener{
-                adapterView: AdapterView<*>, view: View, position: Int, id: Long->
+                if (item != null) {
+                    lifecycleScope.launch {
+                        val produtoDao = AppDatabase.getInstance(applicationContext).produtoDao()
+                        produtoDao.deletar(ProdutoMapper.toEntity(item, item.foto?.toString()))
 
-            //Buscando o item
-            val item = productsAdapter.getItem(position)
+                        productsAdapter.remove(item)
+                        productsAdapter.notifyDataSetChanged()
 
-            //Removendo
-            productsAdapter.remove(item)
+                        Toast.makeText(this@MainActivity, "Item excluído: ${item.nome}", Toast.LENGTH_SHORT).show()
+                    }
+                }
 
-            Toast.makeText(this, "Item excluído: $item", Toast.LENGTH_SHORT).show()
+                true
+            }
 
-            //Retorno informando que o click foi realizado com sucesso
-            true
 
         }
     }
+
 
 
 

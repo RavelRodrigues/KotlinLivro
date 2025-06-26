@@ -8,7 +8,7 @@ import androidx.room.RoomDatabase
 
 
 //ListaComprasDatabase é onde o Room vai gerenciar o banco de dados e as operações CRUD
-@Database(entities = [Produto::class], version = 1)
+@Database(entities = [ProdutoEntity::class], version = 1)
 abstract class ListaComprasDatabase : RoomDatabase() {
     abstract fun produtoDao(): ProdutoDao
 
