@@ -8,5 +8,5 @@ data class Produto(
     val nome: String,
     val quantidade: Int,
     val valor: Double,
-    val foto: Bitmap? = null  // Mantém o Bitmap para facilitar uso na UI
+    val foto: Bitmap? = null
 )

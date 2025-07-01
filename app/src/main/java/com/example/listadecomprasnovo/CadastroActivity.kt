@@ -15,6 +15,8 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
+import java.io.File
+import java.io.FileOutputStream
 
 class CadastroActivity : AppCompatActivity() {
 
@@ -90,18 +92,31 @@ class CadastroActivity : AppCompatActivity() {
 
         if (requestCode == COD_IMAGE && resultCode == Activity.RESULT_OK) {
             data?.data?.let { uri ->
-                imageUri = uri.toString()
                 val inputStream = contentResolver.openInputStream(uri)
-                imageBitMap = BitmapFactory.decodeStream(inputStream)
+                val bitmap = BitmapFactory.decodeStream(inputStream)
+
+                // Salvar imagem no armazenamento interno
+                val fileName = "imagem_${System.currentTimeMillis()}.png"
+                val file = File(filesDir, fileName)
+                val outputStream = FileOutputStream(file)
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
+                outputStream.flush()
+                outputStream.close()
+
+                // Agora temos o caminho local
+                imageUri = file.absolutePath
+                imageBitMap = bitmap
+
                 val img_photo_product = findViewById<ImageView>(R.id.img_photo_product)
-                img_photo_product.setImageBitmap(imageBitMap)
+                img_photo_product.setImageBitmap(bitmap)
             }
         }
     }
-
     private fun abrirGaleria() {
         val intent = Intent(Intent.ACTION_GET_CONTENT)
         intent.type = "image/*"
         startActivityForResult(Intent.createChooser(intent, "Selecione uma imagem"), COD_IMAGE)
     }
+
+
 }

@@ -1,6 +1,7 @@
 package com.example.listadecomprasnovo
 
 import android.content.Context
+import android.graphics.BitmapFactory
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -34,7 +35,7 @@ class ProductAdapter (contexto: Context): ArrayAdapter<Produto>(contexto, 0){
             val txt_product = v.findViewById<TextView>(R.id.txt_item_product)
             val txt_qtd = v.findViewById<TextView>(R.id.txt_qtd)
             val txt_value = v.findViewById<TextView>(R.id.txt_value)
-            val img_product = v.findViewById<ImageView>(R.id.img_photo_product)
+            val img_product = v.findViewById<ImageView>(R.id.img_list_product)
 
 
             //atribuindo os valores digitados
@@ -51,7 +52,11 @@ class ProductAdapter (contexto: Context): ArrayAdapter<Produto>(contexto, 0){
             //Se o usuario nao inserir foto sera colocada uma padrao
             if (item.foto != null) {
                 img_product.setImageBitmap(item.foto)
+            } else {
+                img_product.setImageResource(R.drawable.ic_launcher_foreground)
             }
+
+
         }
         return v
     }

@@ -29,7 +29,7 @@ class MainActivity : AppCompatActivity() {
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
 
-        // Inicializa o ListView e o Adapter uma vez só
+        // Inicializa o ListView e o Adapter
         listView = findViewById(R.id.list_view_products)
         productsAdapter = ProductAdapter(this)
         listView.adapter = productsAdapter
@@ -97,7 +97,7 @@ class MainActivity : AppCompatActivity() {
             val f = NumberFormat.getCurrencyInstance(Locale("pt", "br"))
             txt_total_value.text = "Total: ${f.format(soma)}"
 
-            // 6. Excluir (caso deseje manter isso no banco depois, veja observação abaixo)
+            // 6. Excluir
             listView.setOnItemLongClickListener { _, _, position, _ ->
                 val item = productsAdapter.getItem(position)
 
@@ -109,6 +109,9 @@ class MainActivity : AppCompatActivity() {
                         productsAdapter.remove(item)
                         productsAdapter.notifyDataSetChanged()
 
+                        val produtosAtualizados = (0 until productsAdapter.count).map { productsAdapter.getItem(it)!! }
+                        atualizarTotal(produtosAtualizados)
+
                         Toast.makeText(this@MainActivity, "Item excluído: ${item.nome}", Toast.LENGTH_SHORT).show()
                     }
                 }
@@ -119,6 +122,14 @@ class MainActivity : AppCompatActivity() {
 
         }
     }
+
+    private fun atualizarTotal(produtos: List<Produto>) {
+        val soma = produtos.sumOf { it.valor * it.quantidade }
+        val txt_total_value = findViewById<TextView>(R.id.txt_total_value)
+        val f = NumberFormat.getCurrencyInstance(Locale("pt", "br"))
+        txt_total_value.text = "Total: ${f.format(soma)}"
+    }
+
 
 
 
