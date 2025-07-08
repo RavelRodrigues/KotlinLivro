@@ -65,10 +65,17 @@ class CadastroActivity : AppCompatActivity() {
                     val idPoduto = produtoDao.inserir(prod)
 
                     Toast.makeText(applicationContext, "Item inserido com sucesso", Toast.LENGTH_SHORT).show()
-
+                    // Limpando os campos
                     txt_product.text.clear()
                     txt_qtd.text.clear()
                     txt_value.text.clear()
+                    // Limpando a imagem
+                    val img_photo_product = findViewById<ImageView>(R.id.img_photo_product)
+                    img_photo_product.setImageResource(R.drawable.ic_launcher_foreground)
+
+                    imageBitMap = null
+                    imageUri = null
+
                 }
 
             } else {
